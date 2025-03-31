@@ -8,6 +8,33 @@ import useUser from "@/hooks/useUser";
 
 // 定义侧边栏宽度常量 - 匹配LobeChat样式
 export const DOCUMENT_SIDEBAR_WIDTH = "320px";
+// 定义中等屏幕尺寸下的侧边栏宽度
+export const DOCUMENT_SIDEBAR_WIDTH_MEDIUM = "280px";
+
+// 自定义钩子用于检测中等屏幕尺寸
+function useMediumScreen() {
+  const [isMediumScreen, setIsMediumScreen] = useState(false);
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMediumScreen(width >= 900 && width <= 1300);
+    };
+    
+    // 初始检查
+    checkScreenSize();
+    
+    // 添加窗口大小变化监听
+    window.addEventListener('resize', checkScreenSize);
+    
+    // 清理函数
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
+  }, []);
+  
+  return isMediumScreen;
+}
 
 function getFileExtension(filename) {
   if (!filename || typeof filename !== 'string') return 'FILE';
@@ -166,6 +193,10 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
   const [loading, setLoading] = useState(true);
   const { showing, showModal, hideModal } = useManageWorkspaceModal();
   const { user } = useUser();
+  const isMediumScreen = useMediumScreen();
+
+  // 根据屏幕尺寸计算侧边栏宽度
+  const sidebarWidth = isMediumScreen ? DOCUMENT_SIDEBAR_WIDTH_MEDIUM : DOCUMENT_SIDEBAR_WIDTH;
 
   // 加载文档
   useEffect(() => {
@@ -223,7 +254,8 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
   });
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-theme-bg-sidebar dark:bg-theme-bg-tertiary" style={{ width: DOCUMENT_SIDEBAR_WIDTH, minWidth: DOCUMENT_SIDEBAR_WIDTH }}>
+    <div className="h-full flex flex-col overflow-hidden bg-theme-bg-sidebar dark:bg-theme-bg-tertiary transition-all duration-300 ease-in-out" 
+      style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
       {/* 顶部标题栏 */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-theme-sidebar-border">
         <div className="flex items-center">
@@ -249,35 +281,48 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
         </div>
       </div>
 
-      {/* 搜索栏 - 调整与标题和文档列表的间距 */}
-      <div className="px-4 py-5 mt-3">
+      {/* 搜索框 */}
+      <div className="p-4">
         <div className="relative">
-          <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-theme-text-subtle" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <MagnifyingGlass className="h-4 w-4 text-theme-text-secondary" aria-hidden="true" />
+          </div>
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
+            className={`
+              block w-full rounded-md border-0 py-2 pl-10 pr-3 
+              text-theme-text bg-theme-bg-tertiary 
+              ring-1 ring-inset ring-theme-sidebar-border 
+              placeholder:text-theme-text-secondary 
+              focus:ring-2 focus:ring-inset focus:ring-blue-600 
+              sm:text-sm sm:leading-6
+              ${isMediumScreen ? 'text-xs py-1.5' : ''} 
+            `}
             placeholder="搜索文档..."
-            className="w-full pl-10 pr-3 py-2 rounded-lg bg-gray-100 dark:bg-theme-bg-secondary text-theme-text text-sm placeholder:text-theme-text-subtle focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
       </div>
 
-      {/* 文档列表 - 调整与搜索框的间距 */}
-      <div className="flex-1 overflow-y-auto mt-2">
+      {/* 主内容区 - 剩余空间 */}
+      <div className="flex-grow overflow-y-auto">
+        {/* 在此保持原有的渲染逻辑，只需要压缩中等屏幕下的文本和间距 */}
         {loading ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="mt-3 text-sm text-theme-text-subtle">加载中...</p>
-            </div>
+          <div className="flex flex-col gap-4 p-4">
+            <div className="animate-pulse h-16 bg-theme-bg-tertiary rounded"></div>
+            <div className="animate-pulse h-16 bg-theme-bg-tertiary rounded"></div>
+            <div className="animate-pulse h-16 bg-theme-bg-tertiary rounded"></div>
           </div>
         ) : documents.length > 0 ? (
           <div>
             <div className="flex flex-col">
               {/* 文档分组标题栏 */}
               <div 
-                className="flex items-center justify-between px-4 py-2 text-sm text-theme-text-secondary"
+                className={`
+                  flex items-center justify-between px-4 py-2 text-sm text-theme-text-secondary
+                  ${isMediumScreen ? 'py-1.5 text-xs' : ''}
+                `}
               >
                 <div 
                   className="flex items-center gap-2 cursor-pointer"
@@ -285,7 +330,7 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
                 >
                   <CaretDown 
                     className={`transition-transform duration-150 ${filesListOpen ? '' : '-rotate-90'}`} 
-                    size={16} 
+                    size={isMediumScreen ? 14 : 16} 
                   />
                   <span>全部文件</span>
                 </div>
@@ -294,7 +339,7 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
                   onClick={showModal}
                   title="上传文档"
                 >
-                  <UploadSimple className="h-4 w-4 text-theme-text-secondary" weight="bold" />
+                  <UploadSimple className={`text-theme-text-secondary ${isMediumScreen ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} weight="bold" />
                 </button>
               </div>
 
@@ -306,7 +351,7 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
                       <DocumentItem key={doc.id || index} document={doc} />
                     ))
                   ) : (
-                    <div className="text-center py-4 text-sm text-theme-text-subtle">
+                    <div className={`text-center py-4 ${isMediumScreen ? 'text-xs py-3' : 'text-sm'} text-theme-text-subtle`}>
                       {searchTerm ? "没有找到匹配的文档" : "没有文档"}
                     </div>
                   )}
@@ -315,23 +360,35 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
             </div>
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center px-4">
-              <FileText size={32} className="mx-auto text-theme-text-subtle mb-2" />
-              <p className="text-theme-text-subtle mb-1">该工作区中没有文档</p>
-              <p className="text-xs text-theme-text-subtle opacity-70">
-                上传文档后可在这里查看和管理
-              </p>
+          <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+            <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 mb-3">
+              <FileText className="h-6 w-6 text-gray-500 dark:text-gray-400" weight="duotone" />
             </div>
+            <h3 className={`mb-1 font-medium text-theme-text ${isMediumScreen ? 'text-sm' : 'text-base'}`}>没有文档</h3>
+            <p className={`mb-4 ${isMediumScreen ? 'text-xs' : 'text-sm'} text-theme-text-secondary`}>上传文档以开始对话</p>
+            <button
+              onClick={showModal}
+              className={`
+                inline-flex items-center rounded-md bg-blue-600 px-3 py-2 
+                text-sm font-semibold text-white shadow-sm 
+                hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 
+                focus-visible:outline-offset-2 focus-visible:outline-blue-600
+                ${isMediumScreen ? 'px-2.5 py-1.5 text-xs' : ''}
+              `}
+            >
+              <UploadSimple className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+              上传文档
+            </button>
           </div>
         )}
       </div>
 
-      {/* 上传文档模态框 */}
+      {/* 管理工作区模态窗口 */}
       {showing && (
         <ManageWorkspace
-          hideModal={hideModal}
-          providedSlug={workspace?.slug || null}
+          showing={showing}
+          hide={hideModal}
+          workspaceSlug={workspace?.slug}
         />
       )}
     </div>
