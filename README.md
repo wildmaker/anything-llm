@@ -1,5 +1,3 @@
-
-
 # 项目概述
 
 Instant-AI 企业版是一款面向中小企业的智能文档分析工具，专注于提供安全可靠的本地化部署方案，帮助企业高效处理和分析内部文档资料。通过自然语言交互和 AI 技术，实现快速部署和使用体验，为中小企业提供高效、安全、低门槛的文档管理解决方案。
@@ -48,6 +46,28 @@ Instant-AI 企业版采用现代化技术栈：
 - **最低配置**：2GB RAM，10GB+ 存储空间
 - **环境**：支持私有云或本地服务器
 - **网络**：可选择完全离线部署或API连接模式
+
+## 项目文档目录
+
+| 文档名称 | 文件路径 | 描述 |
+|---------|---------|------|
+| 产品需求 | [prompt/01-prd.md](prompt/01-prd.md) | 产品需求、目标用户和核心功能 |
+| 应用流程 | [prompt/02-app-flow.md](prompt/02-app-flow.md) | 应用主要流程图和交互模型 |
+| 技术栈 | [prompt/03-tech-stack.md](prompt/03-tech-stack.md) | 前后端技术栈、框架和工具 |
+| 前端指南 | [prompt/04-frontend-guidelines.md](prompt/04-frontend-guidelines.md) | 前端开发规范和UI设计原则 |
+| 后端结构 | [prompt/05-backend-structure.md](prompt/05-backend-structure.md) | 后端架构、数据库模型和API设计 |
+| 实施计划 | [prompt/06-implementation-plan.md](prompt/06-implementation-plan.md) | Docker私有化部署、开发环境启动与LLM API连接步骤 |
+| 开发方法论 | [prompt/07-development-methodology.md](prompt/07-development-methodology.md) | TDD红绿测试和敏捷开发协作流程 |
+| 功能清单 | [prompt/08-feature-todos.md](prompt/08-feature-todos.md) | 功能开发进度追踪和任务列表 |
+| 项目索引 | [prompt/00-index.md](prompt/00-index.md) | 文档索引和导航 |
+
+### 文档使用方法
+
+- **项目启动**: 先阅读产品需求(01)和应用流程(02)
+- **技术开发**: 参考技术栈(03)、前端指南(04)和后端结构(05)
+- **部署实施**: 按照实施计划(06)进行系统部署或开发环境搭建
+- **协作开发**: 遵循开发方法论(07)的TDD和敏捷实践
+- **功能开发**: 根据功能清单(08)检查开发进度并更新状态
 
 ## 快速开始
 
