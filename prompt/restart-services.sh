@@ -9,8 +9,9 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m' # 无颜色
 
-# 项目根目录
-PROJECT_DIR="/Users/wildmaker/Documents/Projects/anything-llm"
+# 项目根目录 - 使用脚本所在目录的相对路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # 前端端口(默认值，将尝试从输出中检测)
 FRONTEND_PORT=3000
@@ -20,13 +21,8 @@ print_message() {
   echo -e "${2}${1}${NC}"
 }
 
-# 进入项目目录
-cd "$PROJECT_DIR" || {
-  print_message "错误: 无法进入项目目录 $PROJECT_DIR" "$RED"
-  exit 1
-}
-
 print_message "=== AnythingLLM 服务重启脚本 ===" "$BLUE"
+print_message "项目目录: $PROJECT_DIR" "$BLUE"
 print_message "正在检查并关闭现有服务..." "$YELLOW"
 
 # 关闭现有的Node.js进程
@@ -70,15 +66,15 @@ if ! command -v screen &> /dev/null; then
   
   # 在后台启动服务
   print_message "启动后端服务..." "$BLUE"
-  npm run dev:server > "$LOG_DIR/server.log" 2>&1 &
+  cd "$PROJECT_DIR" && npm run dev:server > "$LOG_DIR/server.log" 2>&1 &
   SERVER_PID=$!
   
   print_message "启动收集器服务..." "$BLUE"
-  npm run dev:collector > "$LOG_DIR/collector.log" 2>&1 &
+  cd "$PROJECT_DIR" && npm run dev:collector > "$LOG_DIR/collector.log" 2>&1 &
   COLLECTOR_PID=$!
   
   print_message "启动前端服务..." "$BLUE"
-  npm run dev:frontend > "$LOG_DIR/frontend.log" 2>&1 &
+  cd "$PROJECT_DIR" && npm run dev:frontend > "$LOG_DIR/frontend.log" 2>&1 &
   FRONTEND_PID=$!
   
   print_message "所有服务已在后台启动" "$GREEN"

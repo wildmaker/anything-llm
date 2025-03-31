@@ -135,53 +135,6 @@ docker run -d -p 3001:3001 \
    npx prisma migrate deploy --schema=./prisma/schema.prisma
    ```
 
-### 开发模式启动
-
-在开发环境中，Instant-AI使用Vite构建工具，支持热更新功能，无需每次修改代码后都重新构建前端。
-
-1. **启动前端开发服务器**
-   ```bash
-   cd frontend
-   yarn dev
-   ```
-   前端开发服务器通常会在`http://localhost:5173`运行，支持热模块替换(HMR)。
-
-2. **启动后端开发服务器**
-   ```bash
-   cd server
-   yarn dev
-   ```
-   后端API服务会在`http://localhost:3001`运行。
-
-3. **启动收集器开发服务器**
-   ```bash
-   cd collector
-   yarn dev
-   ```
-   文档收集器服务通常在`http://localhost:3005`运行。
-
-### 重启和更新流程
-
-1. **停止所有Node进程**
-   ```bash
-   pkill node
-   ```
-
-2. **更新代码库**
-   ```bash
-   git pull origin master
-   ```
-
-3. **重新安装依赖（如有必要）**
-   ```bash
-   cd frontend && yarn
-   cd ../server && yarn
-   cd ../collector && yarn
-   ```
-
-4. **重新启动服务**
-   按照上述"开发模式启动"的步骤重新启动各个服务
-
 ### 开发模式自动化脚本示例
 
 可以创建以下脚本`dev-start.sh`来自动启动所有开发服务：
@@ -189,22 +142,52 @@ docker run -d -p 3001:3001 \
 ```bash
 #!/bin/bash
 
+# 获取脚本所在目录的绝对路径
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$SCRIPT_DIR"
+
+# 设置颜色
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # 无颜色
+
+echo -e "${BLUE}启动 AnythingLLM 开发环境${NC}"
+echo -e "${YELLOW}项目路径: $PROJECT_DIR${NC}"
+
+# 创建日志目录
+mkdir -p "$PROJECT_DIR/logs"
+
 # 启动前端
-cd frontend
-yarn dev &
+echo -e "${BLUE}启动前端服务...${NC}"
+cd "$PROJECT_DIR/frontend" && yarn dev > "$PROJECT_DIR/logs/frontend.log" 2>&1 &
+FRONTEND_PID=$!
 
 # 启动后端
-cd ../server
-yarn dev &
+echo -e "${BLUE}启动后端服务...${NC}"
+cd "$PROJECT_DIR/server" && yarn dev > "$PROJECT_DIR/logs/server.log" 2>&1 &
+SERVER_PID=$!
 
 # 启动收集器
-cd ../collector
-yarn dev &
+echo -e "${BLUE}启动收集器服务...${NC}"
+cd "$PROJECT_DIR/collector" && yarn dev > "$PROJECT_DIR/logs/collector.log" 2>&1 &
+COLLECTOR_PID=$!
 
-echo "所有服务已启动，请访问 http://localhost:5173"
+echo -e "${GREEN}所有服务已启动!${NC}"
+echo -e "${GREEN}前端访问地址: http://localhost:5173${NC}"
+echo -e "${YELLOW}服务日志位置:${NC}"
+echo -e "${YELLOW}- 前端: $PROJECT_DIR/logs/frontend.log${NC}"
+echo -e "${YELLOW}- 后端: $PROJECT_DIR/logs/server.log${NC}"
+echo -e "${YELLOW}- 收集器: $PROJECT_DIR/logs/collector.log${NC}"
+echo ""
+echo -e "${BLUE}按 Ctrl+C 停止所有服务${NC}"
+
+# 等待用户按下Ctrl+C
+trap "kill $FRONTEND_PID $SERVER_PID $COLLECTOR_PID; echo -e '${GREEN}所有服务已停止${NC}'; exit" INT
+wait
 ```
 
-确保通过`chmod +x dev-start.sh`赋予脚本执行权限。
+确保通过`chmod +x dev-start.sh`赋予脚本执行权限，然后在项目根目录执行`./dev-start.sh`启动所有服务。
 
 ## 支持的LLM和向量数据库
 
