@@ -213,12 +213,11 @@ export default function ActiveWorkspaces() {
     return colorSets[hash % colorSets.length];
   };
 
-  const handleWorkspaceClick = (e, workspace) => {
+  const handleWorkspaceClick = (e, workspace, isActive) => {
     e.preventDefault();
     if (!isActive && workspace.slug) {
       // 先启动过渡动画
       startTransition();
-      
       // 延迟导航，让过渡效果有时间显示
       setTimeout(() => {
         navigate(paths.workspace.chat(workspace.slug));
@@ -300,6 +299,7 @@ export default function ActiveWorkspaces() {
 
         {/* 工作区列表 */}
         <div className="flex flex-col mb-4">
+          {/* 工作区列表的标题栏，包含标题文本和展开/收起按钮 */}
           <div
             className="flex items-center justify-between pb-1 mb-1 cursor-pointer"
             onClick={() => setWorkspacesExpanded(!workspacesExpanded)}
@@ -353,7 +353,7 @@ export default function ActiveWorkspaces() {
                                 role="listitem"
                               >
                                 <div
-                                  onClick={(e) => handleWorkspaceClick(e, workspace)}
+                                  onClick={(e) => handleWorkspaceClick(e, workspace, isActive)}
                                   className={`flex items-center justify-between px-4 py-4 rounded-lg transition-colors group h-[70px]
                                     ${isActive
                                       ? 'bg-blue-50 dark:bg-blue-900/20'

@@ -5,6 +5,8 @@ import { FullScreenLoader } from '@/components/Preloader';
 import WorkspaceChatComponent from '@/components/WorkspaceChat';
 import Sidebar from '@/components/Sidebar';
 import LobeNavBar from '@/components/LobeNavBar';
+import Workspace from "@/models/workspace";
+
 
 export default function WorkspaceChat() {
   const { loading, requiresAuth, mode } = usePasswordModal();
@@ -19,7 +21,6 @@ export default function WorkspaceChat() {
 }
 
 function ShowWorkspaceChat() {
-  const { slug, threadSlug = null } = useParams();
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-theme-bg-primary">
       <div className="flex w-full h-full overflow-hidden">  
@@ -27,8 +28,6 @@ function ShowWorkspaceChat() {
         <Sidebar />
         <div className="flex-1 overflow-hidden">
           <WorkspaceChatComponent
-            slug={slug}
-            threadSlug={threadSlug}
           />
         </div>
       </div>
