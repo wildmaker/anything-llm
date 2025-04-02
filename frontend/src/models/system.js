@@ -345,29 +345,33 @@ const System = {
     return { appName: customAppName, error: null };
   },
   fetchLogo: async function () {
-    const url = new URL(`${fullApiUrl()}/system/logo`);
+    const url = new URL(`${API_BASE}/system/logo`);
     url.searchParams.append(
       "theme",
       localStorage.getItem("theme") || "default"
     );
 
-    return await fetch(url, {
-      method: "GET",
-      cache: "no-cache",
-    })
-      .then(async (res) => {
-        if (res.ok && res.status !== 204) {
-          const isCustomLogo = res.headers.get("X-Is-Custom-Logo") === "true";
-          const blob = await res.blob();
-          const logoURL = URL.createObjectURL(blob);
-          return { isCustomLogo, logoURL };
-        }
-        throw new Error("Failed to fetch logo!");
-      })
-      .catch((e) => {
-        console.log(e);
-        return { isCustomLogo: false, logoURL: null };
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        cache: "no-cache",
       });
+
+      if (res.ok && res.status !== 204) {
+        const isCustomLogo = res.headers.get("X-Is-Custom-Logo") === "true";
+        const blob = await res.blob();
+        const logoURL = URL.createObjectURL(blob);
+        return { success: true, isCustomLogo, logoURL };
+      } else if (res.status === 204) {
+        console.log("System.fetchLogo: No custom logo set (204 No Content).");
+        return { success: true, isCustomLogo: false, logoURL: null };
+      } else {
+        throw new Error(`Failed to fetch logo! Status: ${res.status}`);
+      }
+    } catch (e) {
+      console.error("System.fetchLogo Error:", e);
+      return { success: false, isCustomLogo: false, logoURL: null, error: e.message };
+    }
   },
   fetchPfp: async function (id) {
     return await fetch(`${API_BASE}/system/pfp/${id}`, {

@@ -18,26 +18,39 @@ export function LogoProvider({ children }) {
       : DefaultLoginLogoLight;
 
   async function fetchInstanceLogo() {
-    try {
-      const { isCustomLogo, logoURL } = await System.fetchLogo();
-      if (logoURL) {
-        setLogo(logoURL);
-        setLoginLogo(isCustomLogo ? logoURL : DefaultLoginLogo);
-        setIsCustomLogo(isCustomLogo);
-      } else {
+    const { success, isCustomLogo, logoURL, error } = await System.fetchLogo();
+
+    if (success && logoURL) {
+      console.log("LogoContext: Fetched logo successfully.", { isCustomLogo });
+      setLogo(logoURL);
+      const DefaultLoginLogo =
         localStorage.getItem("theme") !== "default"
-          ? setLogo(AnythingLLMDark)
-          : setLogo(AnythingLLM);
-        setLoginLogo(DefaultLoginLogo);
-        setIsCustomLogo(false);
-      }
-    } catch (err) {
+          ? DefaultLoginLogoDark
+          : DefaultLoginLogoLight;
+      setLoginLogo(isCustomLogo ? logoURL : DefaultLoginLogo);
+      setIsCustomLogo(isCustomLogo);
+    } else if (success && !logoURL) {
+      console.log("LogoContext: No custom logo available, using defaults.");
+      const DefaultLoginLogo =
+        localStorage.getItem("theme") !== "default"
+          ? DefaultLoginLogoDark
+          : DefaultLoginLogoLight;
       localStorage.getItem("theme") !== "default"
         ? setLogo(AnythingLLMDark)
         : setLogo(AnythingLLM);
       setLoginLogo(DefaultLoginLogo);
       setIsCustomLogo(false);
-      console.error("Failed to fetch logo:", err);
+    } else {
+      console.error("LogoContext: Failed to fetch logo, using defaults. Error:", error);
+      const DefaultLoginLogo =
+        localStorage.getItem("theme") !== "default"
+          ? DefaultLoginLogoDark
+          : DefaultLoginLogoLight;
+      localStorage.getItem("theme") !== "default"
+        ? setLogo(AnythingLLMDark)
+        : setLogo(AnythingLLM);
+      setLoginLogo(DefaultLoginLogo);
+      setIsCustomLogo(false);
     }
   }
 
