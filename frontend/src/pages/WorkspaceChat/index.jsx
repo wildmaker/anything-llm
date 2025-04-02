@@ -26,8 +26,8 @@ function ShowWorkspaceChat() {
   const { showSidebar } = useSidebarToggle();
 
   return (
-    <>
-      <div className="w-screen h-screen overflow-hidden bg-theme-bg-container flex">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-theme-bg-primary">
+      <div className="flex w-full h-full overflow-hidden">
         {!isMobile && (
           <>
             <LobeNavBar />
@@ -35,13 +35,13 @@ function ShowWorkspaceChat() {
           </>
         )}
         <div 
-          className={`flex-1 ${!isMobile && showSidebar ? 'ml-[352px]' : !isMobile ? 'ml-[60px]' : ''} transition-all duration-300 ease-in-out`}
+          className={`flex-1 ${!isMobile && showSidebar ? 'ml-[352px]' : !isMobile ? 'ml-[60px]' : ''} transition-all duration-300 ease-in-out overflow-y-hidden overflow-x-auto`}
         >
           <WorkspaceChatContainer 
             workspaceSlug={slug}
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }

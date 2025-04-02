@@ -9,77 +9,76 @@ import paths from "@/utils/paths";
 import ModalWrapper from "../ModalWrapper";
 import { useParams } from "react-router-dom";
 import { DnDFileUploaderProvider } from "./ChatContainer/DnDWrapper";
+import { useUser } from "@/contexts/UserContext";
 
-export default function WorkspaceChat({ workspaceSlug }) {
-  const { threadSlug = null } = useParams();
+export default function WorkspaceChatComponent() {
+  const { slug, threadSlug = null } = useParams();
   const [workspace, setWorkspace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
-  const [showDocumentSidebar, setShowDocumentSidebar] = useState(true); // 保留
-  const [isDefaultWorkspace, setIsDefaultWorkspace] = useState(false); // 保留
-  const [fadeIn, setFadeIn] = useState(false); // 保留
+  const [error, setError] = useState(null);
+  const [showDocumentSidebar, setShowDocumentSidebar] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
+  const { user } = useUser();
+  const isMounted = useRef(true);
+
+  const isDefaultWorkspace = workspace ? Workspace.isDefaultWorkspace(workspace.id) : false;
 
   useEffect(() => {
-    let isMounted = true; // Add isMounted flag for cleanup
+    isMounted.current = true;
     async function loadWorkspaceAndHistory() {
-      if (!workspaceSlug) {
+      if (!slug) {
+        console.log("[WorkspaceChat Effect] No slug provided, skipping load.");
         setLoading(false);
-        setWorkspace(null);
-        setHistory([]);
+        setError("No workspace slug provided.");
         return;
       }
 
       setLoading(true);
-      setFadeIn(false); // 开始加载时淡出
-      console.log("WorkspaceChat: Loading data for slug:", workspaceSlug);
+      setFadeIn(false);
+      console.log("WorkspaceChat: Loading data for slug:", slug);
 
       try {
-        console.log("[ChatComponent Effect] TRY block START"); // <--- 日志 A
-        // 加载工作区数据
-        const _workspace = await Workspace.bySlug(workspaceSlug);
-        if (!isMounted) return; // Check after await
+        console.log("[ChatComponent Effect] TRY block START");
+        const _workspace = await Workspace.bySlug(slug);
+        if (!isMounted.current) return;
         if (!_workspace) {
-          console.error("WorkspaceChat: Workspace not found for slug:", workspaceSlug);
+          console.error("WorkspaceChat: Workspace not found for slug:", slug);
           setWorkspace(null);
           setHistory([]);
-          // setLoading(false); // Moved to finally
           return;
         }
 
-        // 加载附加信息
         const [suggestedMessages, pfpUrl] = await Promise.all([
-          Workspace.getSuggestedMessages(workspaceSlug),
-          Workspace.fetchPfp(workspaceSlug)
+          Workspace.getSuggestedMessages(slug),
+          Workspace.fetchPfp(slug)
         ]);
-         if (!isMounted) return; // Check after await
+         if (!isMounted.current) return;
         const workspaceData = { ..._workspace, suggestedMessages, pfpUrl };
         setWorkspace(workspaceData);
-        setIsDefaultWorkspace(Workspace.isDefaultWorkspace(workspaceData.id)); // 更新默认状态
 
-        // 加载聊天历史
-        console.log("WorkspaceChat: Loading chat history for", { workspaceSlug, threadSlug });
+        console.log("WorkspaceChat: Loading chat history for", { slug, threadSlug });
         const chatHistory = threadSlug
-          ? await Workspace.threads.chatHistory(workspaceSlug, threadSlug)
-          : await Workspace.chatHistory(workspaceSlug);
-         if (!isMounted) return; // Check after await
+          ? await Workspace.threads.chatHistory(slug, threadSlug)
+          : await Workspace.chatHistory(slug);
+         if (!isMounted.current) return;
         setHistory(chatHistory);
-        console.log("WorkspaceChat: Chat history loaded", { count: chatHistory.length, workspaceSlug });
-        console.log("[ChatComponent Effect] TRY block END - Before finally"); // <--- 日志 B
+        console.log("WorkspaceChat: Chat history loaded", { count: chatHistory.length, slug });
+        console.log("[ChatComponent Effect] TRY block END - Before finally");
 
       } catch (error) {
-        console.error("[ChatComponent Effect] CATCH block START", error); // <--- 日志 C
-        if (isMounted) {
-          setWorkspace(null); // 出错时重置
+        console.error("[ChatComponent Effect] CATCH block START", error);
+        if (isMounted.current) {
+          setWorkspace(null);
           setHistory([]);
         }
-         console.error("[ChatComponent Effect] CATCH block END - Before finally"); // <--- 日志 D
+         console.error("[ChatComponent Effect] CATCH block END - Before finally");
       } finally {
-        console.log("[ChatComponent Effect] FINALLY block START"); // <--- 日志 E
-        if (isMounted) {
+        console.log("[ChatComponent Effect] FINALLY block START");
+        if (isMounted.current) {
             setLoading(false);
-            console.log("[ChatComponent Effect] FINALLY block - setLoading(false) called"); // <--- 日志 F
-            // 数据加载完成后淡入
-            setTimeout(() => { if(isMounted) setFadeIn(true) }, 50); // 短暂延迟以确保渲染
+            console.log("[ChatComponent Effect] FINALLY block - setLoading(false) called");
+            setTimeout(() => { if(isMounted.current) setFadeIn(true) }, 50);
         }
       }
     }
@@ -87,82 +86,62 @@ export default function WorkspaceChat({ workspaceSlug }) {
     loadWorkspaceAndHistory();
 
      return () => {
-        isMounted = false; // Cleanup on unmount
+        isMounted.current = false;
         console.log("[ChatComponent Effect] Cleanup - component unmounted or dependencies changed.");
     }
-    // 依赖 workspaceSlug 和 threadSlug
-  }, [workspaceSlug, threadSlug]);
+  }, [slug, threadSlug]);
 
   const toggleDocumentSidebar = () => {
     setShowDocumentSidebar(prevState => !prevState);
   };
 
-  if (!loading && !workspace && workspaceSlug) {
-     return (
-       <>
-         <ModalWrapper isOpen={true}>
-           <div className="relative w-full max-w-2xl bg-theme-bg-secondary rounded-lg shadow border-2 border-theme-modal-border">
-             <div className="flex flex-col gap-y-4 w-full p-6 text-center">
-               <p className="font-semibold text-red-500 text-xl">
-                 Workspace not found!
-               </p>
-               <p className="text-sm mt-4 text-white">
-                 Could not find a workspace with slug "{workspaceSlug}".
-               </p>
-               <div className="flex w-full justify-center items-center mt-4">
-                 <a
-                   href={paths.home()}
-                   className="transition-all duration-300 bg-white text-black hover:opacity-60 px-4 py-2 rounded-lg text-sm flex items-center gap-x-2"
-                 >
-                   Go back to homepage
-                 </a>
-               </div>
-             </div>
-           </div>
-         </ModalWrapper>
-         <SkeletonChat />
-       </>
-     );
+  if (loading) {
+    console.log("[WorkspaceChat Render] Showing loader");
+    return <SkeletonChat />;
   }
 
-  setEventDelegatorForCodeSnippets();
-  return loading ? (
-    <SkeletonChat />
-  ) : (
-    workspace && (
+  if (!workspace) {
+    console.log("[WorkspaceChat Render] No workspace found, showing error/empty state");
+    return (
+      <div className="flex w-full h-full items-center justify-center">
+        <p className="text-gray-500 text-center">Workspace not found.</p>
+      </div>
+    );
+  }
+
+  console.log("[WorkspaceChat Render] Rendering main chat interface");
+  return (
+    <div className={`flex h-full w-full relative transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+      {showDocumentSidebar && (
+        <div className="h-full border-r border-theme-sidebar-border flex-shrink-0" style={{ backgroundColor: "var(--theme-file-row-even)" }}>
+          <DocumentFileSidebar workspace={workspace} onClose={toggleDocumentSidebar} />
+        </div>
+      )}
+
       <DnDFileUploaderProvider workspace={workspace}>
-        <div className={`flex h-screen w-full relative transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="flex w-full h-full flex-col">
-            <div className="flex-shrink-0 z-10">
-              <ChatHeader
-                workspace={{
-                  ...workspace,
-                  defaultWorkspace: isDefaultWorkspace
-                }}
-                showSidebar={showDocumentSidebar}
-                toggleSidebar={toggleDocumentSidebar}
-                chatHistory={history}
-              />
-            </div>
-            <div className="flex flex-grow h-[calc(100%-57px)] overflow-hidden">
-              <div className="flex-grow h-full" style={{ backgroundColor: "var(--theme-bg-chat)" }}>
-                <ChatContainer
-                  workspace={workspace}
-                  knownHistory={history}
-                  showSidebar={showDocumentSidebar}
-                  toggleSidebar={toggleDocumentSidebar}
-                />
-              </div>
-              {showDocumentSidebar && (
-                <div className="h-full border-l border-theme-sidebar-border w-[320px]" style={{ backgroundColor: "var(--theme-file-row-even)" }}>
-                  <DocumentFileSidebar workspace={workspace} onClose={toggleDocumentSidebar} />
-                </div>
-              )}
-            </div>
+        <div className="flex flex-col flex-grow h-full overflow-hidden">
+          <div className="flex-shrink-0 z-10">
+            <ChatHeader
+              workspace={{
+                ...workspace,
+                defaultWorkspace: isDefaultWorkspace
+              }}
+              showSidebar={showDocumentSidebar}
+              toggleSidebar={toggleDocumentSidebar}
+              chatHistory={history}
+            />
+          </div>
+          <div className="flex-grow h-[calc(100%-57px)] overflow-hidden" style={{ backgroundColor: "var(--theme-bg-chat)" }}>
+            <ChatContainer
+              workspace={workspace}
+              knownHistory={history}
+              showSidebar={showDocumentSidebar}
+              toggleSidebar={toggleDocumentSidebar}
+            />
           </div>
         </div>
       </DnDFileUploaderProvider>
-    )
+    </div>
   );
 }
 
