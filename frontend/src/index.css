@@ -40,7 +40,7 @@
 
   --theme-button-primary: #46c8ff;
   --theme-button-primary-hover: #434343;
-
+  --theme-button-text :#0e0f0f;
   --theme-button-cta: #7cd4fd;
 
   --theme-message-bubble-user: #46c8ff;
@@ -73,6 +73,7 @@
   --theme-button-primary: #1e40af;
   --theme-button-primary-hover: #2563eb;
   --theme-button-cta: #2563eb;
+  --theme-button-text :#ffffff;
   --theme-sidebar-border: #e5e7eb;
   --theme-chat-input-border: #dce0e8;
   --theme-modal-border: #e5e7eb;

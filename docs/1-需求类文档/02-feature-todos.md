@@ -150,7 +150,8 @@
       - 文档项之间间距：10px
       - 文档项内间距：5-10px
   - 🟢 文档列表项右侧的第二行文字下边框应该与左侧封面下边框对齐。也就是两行文字上下分布两端
-  - 🔴 小屏幕时（width<1200px），DocumentFileSidebar 应该能完整显示
+  - 🟢 小屏幕时（width<1200px），DocumentFileSidebar 应该能完整显示
+  - 🔴 文件为空时，按钮颜色和样式需要优化
 
 ## 顶部导航栏 chatheader
 - 🟢 隐藏最右侧的 action icon Clock 组件

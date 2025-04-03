@@ -335,7 +335,7 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
                   <span>全部文件</span>
                 </div>
                 <button 
-                  className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="p-1.5 rounded-md bg-theme-button-primary text-[color:var(--theme-button-text)] hover:bg-theme-button-primary-hover transition-colors"
                   onClick={showModal}
                   title="上传文档"
                 >
@@ -370,7 +370,7 @@ export default function DocumentFileSidebar({ workspace, onClose }) {
               onClick={showModal}
               className={`
                 inline-flex items-center rounded-md bg-blue-600 px-3 py-2 
-                text-sm font-semibold text-white shadow-sm 
+                text-sm font-semibold text-[color:var(--theme-button-text)] shadow-sm 
                 hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 
                 focus-visible:outline-offset-2 focus-visible:outline-blue-600
                 ${isMediumScreen ? 'px-2.5 py-1.5 text-xs' : ''}
