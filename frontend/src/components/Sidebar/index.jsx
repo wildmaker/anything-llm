@@ -208,7 +208,7 @@ export default function Sidebar() {
                 className="p-1.5 rounded-md hover:bg-theme-sidebar-item-hover transition-colors"
                 title={t("new-workspace.title")}
               >
-                <Plus size={18} />
+                <Plus size={18} /> 
               </button>
             </div>
             

@@ -213,15 +213,29 @@ export default function ActiveWorkspaces() {
     return colorSets[hash % colorSets.length];
   };
 
-  const handleWorkspaceClick = (e, workspace, isActive) => {
+  const handleWorkspaceClick = async (e, workspace, isActive) => {
     e.preventDefault();
     if (!isActive && workspace.slug) {
-      // 先启动过渡动画
-      startTransition();
-      // 延迟导航，让过渡效果有时间显示
-      setTimeout(() => {
-        navigate(paths.workspace.chat(workspace.slug));
-      }, 100);
+      // startTransition(); // 在全页面刷新场景下，这个可能意义不大
+      try {
+        const { threads } = await Workspace.threads.all(workspace.slug);
+        let targetUrl; // 定义目标 URL 变量
+
+        if (threads && threads.length > 0) {
+          targetUrl = paths.workspace.thread(workspace.slug, threads[threads.length - 1].slug);
+        } else {
+          targetUrl = paths.workspace.chat(workspace.slug);
+        }
+        
+        console.log(`[handleWorkspaceClick] Navigating (full refresh) to: ${targetUrl}`);
+        window.location.replace(targetUrl); // 使用 replace 跳转
+
+      } catch (error) {
+        console.error("Failed to fetch threads, navigating (full refresh) to default chat:", error);
+        const targetUrl = paths.workspace.chat(workspace.slug); // 错误时跳转到默认聊天
+        window.location.replace(targetUrl); // 使用 replace 跳转
+      }
+      // setTimeout 不再需要，因为 replace 会立即开始跳转
     }
   };
 

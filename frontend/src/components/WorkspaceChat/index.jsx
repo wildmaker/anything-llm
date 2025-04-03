@@ -10,7 +10,7 @@ import ModalWrapper from "../ModalWrapper";
 import { useParams } from "react-router-dom";
 import { DnDFileUploaderProvider } from "./ChatContainer/DnDWrapper";
 
-export default function WorkspaceChat({ workspaceSlug }) {
+export default function WorkspaceChat({ loading: externalLoading, workspace: externalWorkspace }) {
   const { threadSlug = null } = useParams();
   const [workspace, setWorkspace] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,84 +20,67 @@ export default function WorkspaceChat({ workspaceSlug }) {
   const [fadeIn, setFadeIn] = useState(false); // 保留
 
   useEffect(() => {
-    let isMounted = true; // Add isMounted flag for cleanup
-    async function loadWorkspaceAndHistory() {
-      if (!workspaceSlug) {
-        setLoading(false);
-        setWorkspace(null);
-        setHistory([]);
-        return;
-      }
+    // 当外部传入了工作区数据时，直接使用它
+    if (externalWorkspace) {
+      console.log("WorkspaceChat: Using externally provided workspace data", externalWorkspace.name);
+      setWorkspace(externalWorkspace);
+      setIsDefaultWorkspace(Workspace.isDefaultWorkspace(externalWorkspace.id));
+      setFadeIn(false); // 重置淡入状态
+      
+      // 短暂延迟后激活淡入效果
+      setTimeout(() => setFadeIn(true), 50);
+    }
+  }, [externalWorkspace]);
 
-      setLoading(true);
-      setFadeIn(false); // 开始加载时淡出
-      console.log("WorkspaceChat: Loading data for slug:", workspaceSlug);
-
+  // 监控外部加载状态
+  useEffect(() => {
+    if (externalLoading !== undefined) {
+      console.log("WorkspaceChat: External loading state changed:", externalLoading);
+      setLoading(externalLoading);
+    }
+  }, [externalLoading]);
+  
+  // 加载聊天历史
+  useEffect(() => {
+    let isMounted = true;
+    async function loadChatHistory() {
+      if (!externalWorkspace?.slug) return;
+      
+      console.log("WorkspaceChat: Loading chat history for", { 
+        workspace: externalWorkspace.slug, 
+        threadSlug 
+      });
+      
       try {
-        console.log("[ChatComponent Effect] TRY block START"); // <--- 日志 A
-        // 加载工作区数据
-        const _workspace = await Workspace.bySlug(workspaceSlug);
-        if (!isMounted) return; // Check after await
-        if (!_workspace) {
-          console.error("WorkspaceChat: Workspace not found for slug:", workspaceSlug);
-          setWorkspace(null);
-          setHistory([]);
-          // setLoading(false); // Moved to finally
-          return;
-        }
-
-        // 加载附加信息
-        const [suggestedMessages, pfpUrl] = await Promise.all([
-          Workspace.getSuggestedMessages(workspaceSlug),
-          Workspace.fetchPfp(workspaceSlug)
-        ]);
-         if (!isMounted) return; // Check after await
-        const workspaceData = { ..._workspace, suggestedMessages, pfpUrl };
-        setWorkspace(workspaceData);
-        setIsDefaultWorkspace(Workspace.isDefaultWorkspace(workspaceData.id)); // 更新默认状态
-
-        // 加载聊天历史
-        console.log("WorkspaceChat: Loading chat history for", { workspaceSlug, threadSlug });
         const chatHistory = threadSlug
-          ? await Workspace.threads.chatHistory(workspaceSlug, threadSlug)
-          : await Workspace.chatHistory(workspaceSlug);
-         if (!isMounted) return; // Check after await
+          ? await Workspace.threads.chatHistory(externalWorkspace.slug, threadSlug)
+          : await Workspace.chatHistory(externalWorkspace.slug);
+          
+        if (!isMounted) return;
         setHistory(chatHistory);
-        console.log("WorkspaceChat: Chat history loaded", { count: chatHistory.length, workspaceSlug });
-        console.log("[ChatComponent Effect] TRY block END - Before finally"); // <--- 日志 B
-
+        console.log("WorkspaceChat: Chat history loaded", { 
+          count: chatHistory.length, 
+          workspace: externalWorkspace.slug 
+        });
       } catch (error) {
-        console.error("[ChatComponent Effect] CATCH block START", error); // <--- 日志 C
-        if (isMounted) {
-          setWorkspace(null); // 出错时重置
-          setHistory([]);
-        }
-         console.error("[ChatComponent Effect] CATCH block END - Before finally"); // <--- 日志 D
-      } finally {
-        console.log("[ChatComponent Effect] FINALLY block START"); // <--- 日志 E
-        if (isMounted) {
-            setLoading(false);
-            console.log("[ChatComponent Effect] FINALLY block - setLoading(false) called"); // <--- 日志 F
-            // 数据加载完成后淡入
-            setTimeout(() => { if(isMounted) setFadeIn(true) }, 50); // 短暂延迟以确保渲染
-        }
+        console.error("WorkspaceChat: Error loading chat history:", error);
+        if (isMounted) setHistory([]);
       }
     }
-
-    loadWorkspaceAndHistory();
-
-     return () => {
-        isMounted = false; // Cleanup on unmount
-        console.log("[ChatComponent Effect] Cleanup - component unmounted or dependencies changed.");
-    }
-    // 依赖 workspaceSlug 和 threadSlug
-  }, [workspaceSlug, threadSlug]);
+    
+    loadChatHistory();
+    
+    return () => {
+      isMounted = false;
+      console.log("ChatHistory effect cleanup");
+    };
+  }, [externalWorkspace?.slug, threadSlug]);
 
   const toggleDocumentSidebar = () => {
     setShowDocumentSidebar(prevState => !prevState);
   };
 
-  if (!loading && !workspace && workspaceSlug) {
+  if (!loading && !workspace && externalWorkspace?.slug) {
      return (
        <>
          <ModalWrapper isOpen={true}>
@@ -107,7 +90,7 @@ export default function WorkspaceChat({ workspaceSlug }) {
                  Workspace not found!
                </p>
                <p className="text-sm mt-4 text-white">
-                 Could not find a workspace with slug "{workspaceSlug}".
+                 Could not find a workspace with slug "{externalWorkspace?.slug}".
                </p>
                <div className="flex w-full justify-center items-center mt-4">
                  <a
