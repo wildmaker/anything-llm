@@ -39,12 +39,12 @@ function WorkspaceItem({ name, active, onClick }) {
 // 骨架屏组件
 function SidebarSkeleton() {
   const { theme } = useTheme();
-  
+
   return (
     <div className="flex flex-col h-full w-full">
       {/* 工作区标题骨架 */}
       <div className="flex justify-between items-center px-4 border-b border-theme-sidebar-border"
-           style={{ height: 57, minHeight: 57 }}>
+        style={{ height: 57, minHeight: 57 }}>
         <Skeleton.default
           height={20}
           width={120}
@@ -61,12 +61,12 @@ function SidebarSkeleton() {
           enableAnimation={true}
         />
       </div>
-      
+
       {/* 工作区列表骨架 */}
       <div className="flex-grow overflow-y-auto px-2 py-2">
         {/* ActiveWorkspaces 组件会处理自己的骨架屏 */}
       </div>
-      
+
       {/* 底部设置骨架 */}
       <div className="p-3 border-t border-theme-sidebar-border">
         <Skeleton.default
@@ -85,7 +85,7 @@ function SidebarSkeleton() {
 // 移动端骨架屏组件
 function SidebarMobileSkeleton() {
   const { theme } = useTheme();
-  
+
   return (
     <div className="w-full h-full flex flex-col overflow-x-hidden items-between">
       {/* Header Information Skeleton */}
@@ -168,17 +168,17 @@ export default function Sidebar() {
     hideModal: hideNewWsModal,
   } = useNewWorkspaceModal();
   const { t } = useTranslation();
-  
+
   // 添加加载状态
   useEffect(() => {
     // 模拟加载延迟，实际情况下可能从某个API或状态获取
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
-  
+
   // 检查当前路径是否匹配工作区
   const getActiveWorkspace = (pathname) => {
     const match = pathname.match(/\/workspace\/([^\/]+)/);
@@ -201,25 +201,23 @@ export default function Sidebar() {
           <div className="flex flex-col h-full w-full">
             {/* 工作区标题 */}
             <div className="flex justify-between items-center px-4 border-b border-theme-sidebar-border"
-                 style={{ height: 57, minHeight: 57 }}>
+              style={{ height: 57, minHeight: 57 }}>
               <h2 className="font-medium text-theme-text">{t("Instant AI ✨")}</h2>
               <button
                 onClick={showNewWsModal}
                 className="p-1.5 rounded-md hover:bg-theme-sidebar-item-hover transition-colors"
                 title={t("new-workspace.title")}
               >
-                <Plus size={18} /> 
+                <Plus size={18} />
               </button>
             </div>
-            
+
             {/* 工作区列表 */}
-            <div className="flex-grow overflow-y-auto px-2 py-2">
-              <ActiveWorkspaces 
-                workspaceItemComponent={WorkspaceItem} 
-                activeWorkspace={getActiveWorkspace(location.pathname)}
+            <div className="flex-grow overflow-y-auto pl-2 py-0 py-2 custom-scrollbar">
+              <ActiveWorkspaces
               />
             </div>
-            
+
             {/* 底部设置 */}
             <div className="p-3 border-t border-theme-sidebar-border">
               <SurveyBanner />
@@ -253,7 +251,7 @@ export function SidebarMobileHeader() {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -312,11 +310,10 @@ export function SidebarMobileHeader() {
         className={`z-99 fixed top-0 left-0 transition-all duration-500 w-[100vw] h-[100vh]`}
       >
         <div
-          className={`${
-            showBgOverlay
+          className={`${showBgOverlay
               ? "transition-all opacity-1"
               : "transition-none opacity-0"
-          }  duration-500 fixed top-0 left-0 bg-theme-bg-secondary bg-opacity-75 w-screen h-screen`}
+            }  duration-500 fixed top-0 left-0 bg-theme-bg-secondary bg-opacity-75 w-screen h-screen`}
           onClick={() => setShowSidebar(false)}
         />
         <div

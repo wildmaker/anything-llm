@@ -42,7 +42,7 @@
   --theme-button-primary-hover: #434343;
 
   --theme-button-cta: #7cd4fd;
-  
+
   --theme-message-bubble-user: #46c8ff;
 
   --theme-file-row-even: #0e0f0f;
@@ -50,6 +50,16 @@
   --theme-file-row-selected-even: rgba(14, 165, 233, 0.2);
   --theme-file-row-selected-odd: rgba(14, 165, 233, 0.1);
   --theme-file-picker-hover: rgb(14 165 233 / 0.2);
+
+  --sidebar-logo-stroke: #ffffff;
+
+  /* Scrollbar Colors (for dark theme) */
+  --scrollbar-track-bg: #1e2130;
+  /* 深色背景 */
+  --scrollbar-thumb-bg: #4b5563;
+  /* 中等灰色滑块 */
+  --scrollbar-thumb-hover-bg: #6b7280;
+  /* 鼠标悬停时的亮灰色 */
 }
 
 [data-theme="light"] {
@@ -89,6 +99,11 @@
   --theme-file-row-selected-even: rgba(37, 99, 235, 0.1);
   --theme-file-row-selected-odd: rgba(37, 99, 235, 0.05);
   --theme-file-picker-hover: rgb(37 99 235 / 0.1);
+
+  /* Scrollbar Colors */
+  --scrollbar-track-bg: transparent; /* 透明背景 */
+  --scrollbar-thumb-bg: #e4e4e4; /* 淡灰色滑块，与浅色主题协调 */
+  --scrollbar-thumb-hover-bg: #94a3b8; /* 悬停时的中灰色，提供良好的交互反馈 */
 }
 
 [data-theme="light"] .text-white {
@@ -113,9 +128,9 @@ This is to override the default border color for the select and input elements
 in the onboarding flow when the theme is not light. This only applies to the
 onboarding flow since its background is dark and is the same fill as the inputs.
 */
-[data-layout="onboarding"] > * select:not([data-theme="light"]),
-[data-layout="onboarding"] > * input:not([data-theme="light"]),
-[data-layout="onboarding"] > * textarea:not([data-theme="light"]) {
+[data-layout="onboarding"]>* select:not([data-theme="light"]),
+[data-layout="onboarding"]>* input:not([data-theme="light"]),
+[data-layout="onboarding"]>* textarea:not([data-theme="light"]) {
   border: 1px solid #ffffff;
 }
 
@@ -249,21 +264,17 @@ a {
 
 @media (prefers-color-scheme: light) {
   .fade-up-border {
-    background: linear-gradient(
-      to bottom,
-      rgba(220, 221, 223, 10%),
-      rgb(220, 221, 223) 89%
-    );
+    background: linear-gradient(to bottom,
+        rgba(220, 221, 223, 10%),
+        rgb(220, 221, 223) 89%);
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .fade-up-border {
-    background: linear-gradient(
-      to bottom,
-      rgba(41, 37, 36, 50%),
-      rgb(41 37 36) 90%
-    );
+    background: linear-gradient(to bottom,
+        rgba(41, 37, 36, 50%),
+        rgb(41 37 36) 90%);
   }
 }
 
@@ -428,7 +439,7 @@ a {
   height: 100px !important;
 }
 
-.grid-loader > circle {
+.grid-loader>circle {
   fill: #008eff;
 }
 
@@ -491,11 +502,9 @@ dialog::backdrop {
 }
 
 .login-input-gradient {
-  background: linear-gradient(
-    180deg,
-    rgba(61, 65, 71, 0.3) 0%,
-    rgba(44, 47, 53, 0.3) 100%
-  ) !important;
+  background: linear-gradient(180deg,
+      rgba(61, 65, 71, 0.3) 0%,
+      rgba(44, 47, 53, 0.3) 100%) !important;
   box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.25);
 }
 
@@ -520,11 +529,11 @@ dialog::backdrop {
   top: 100%;
 }
 
-.user-reply > div:first-of-type {
+.user-reply>div:first-of-type {
   border: 2px solid white;
 }
 
-.reply > *:last-child::after {
+.reply>*:last-child::after {
   content: "|";
   animation: blink 1.5s steps(1) infinite;
   color: white;
@@ -585,7 +594,7 @@ dialog::backdrop {
  * ==============================================
  */
 .markdown,
-.markdown > * {
+.markdown>* {
   font-weight: 400;
 }
 
@@ -656,12 +665,13 @@ dialog::backdrop {
   padding: 14px 15px;
 }
 
-.markdown > * a {
+.markdown>* a {
   color: var(--theme-button-cta);
   text-decoration: underline;
 }
 
 @media (max-width: 600px) {
+
   .markdown table th,
   .markdown table td {
     padding: 10px;
@@ -733,7 +743,7 @@ dialog::backdrop {
   text-decoration: underline;
 }
 
-.markdown ul li > ul {
+.markdown ul li>ul {
   padding-left: 20px;
   margin: 0px;
 }
@@ -743,7 +753,7 @@ dialog::backdrop {
   margin: 0.35rem;
 }
 
-.markdown > p > a,
+.markdown>p>a,
 .markdown p a {
   text-decoration: underline;
 }
@@ -829,11 +839,11 @@ does not extend the close button beyond the viewport. */
 }
 
 /* Recharts rendering styles */
-.recharts-text > * {
+.recharts-text>* {
   fill: #fff;
 }
 
-[data-theme="light"] .recharts-text > * {
+[data-theme="light"] .recharts-text>* {
   fill: #000;
 }
 
@@ -949,6 +959,7 @@ does not extend the close button beyond the viewport. */
 }
 
 @keyframes bounce-subtle {
+
   0%,
   100% {
     transform: translateY(0);
@@ -985,6 +996,7 @@ does not extend the close button beyond the viewport. */
     opacity: 0;
     transform: translateY(-5px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1207,4 +1219,64 @@ textarea:not(:hover)::-webkit-scrollbar-thumb {
 
 textarea:hover::-webkit-scrollbar-thumb {
   background-color: var(--theme-chat-input-border);
+}
+
+/* Apply scrollbar styles (optional but recommended) */
+::-webkit-scrollbar {
+  width: 8px;
+  /* Adjust width as needed */
+  height: 8px;
+  /* Adjust height as needed */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border-radius: 4px;
+  /* Optional: adds rounded corners */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-bg);
+  border-radius: 4px;
+  /* Optional: adds rounded corners */
+  border: 2px solid var(--scrollbar-track-bg);
+  /* Creates padding around thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-bg);
+}
+
+/* Styles for Firefox (optional) */
+* {
+  scrollbar-width: thin;
+  /* "auto" or "thin" */
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+  /* thumb and track color */
+}
+
+/* 自定义滚动条样式，适用于带有 'custom-scrollbar' 类的元素 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;  /* 垂直滚动条的宽度 */
+  height: 6px; /* 水平滚动条的高度 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg); /* 滚动条轨道的背景色 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-bg); /* 滚动条滑块的颜色 */
+  border-radius: 3px; /* 滑块的圆角 */
+  border: 1px solid var(--scrollbar-track-bg); /* 滑块周围的细边框，用于视觉分隔 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-bg); /* 鼠标悬停在滑块上时的颜色 */
+}
+
+/* Firefox 浏览器特定的滚动条样式 */
+.custom-scrollbar {
+  scrollbar-width: thin; /* 使滚动条比默认更细 */
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* 设置滑块和轨道的颜色 */
 }
